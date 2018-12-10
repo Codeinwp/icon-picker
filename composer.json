@@ -1,0 +1,17 @@
+{
+    "name": "codeinwp/icon-picker",
+    "description": "Pick an icon of your choice.",
+    "keywords": ["wordpress", "plugin", "icons", "genericons", "dashicons", "font-awesome", "elusive", "foundation-icons"],
+    "homepage": "https://github.com/codeinwp/icon-picker",
+    "license": "GPL-2.0",
+    "type": "wordpress-plugin",
+    "require": {
+      "composer/installers": "~1.0"
+    },
+    "authors": [
+
+    ],
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^0.10.0"
+    }
+}
