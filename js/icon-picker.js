@@ -6,9 +6,9 @@
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -63,32 +63,133 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 15);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-wp.media.model.IconPickerTarget = __webpack_require__(5);
-wp.media.model.IconPickerFonts = __webpack_require__(4);
+wp.media.model.IconPickerTarget = __webpack_require__(6);
+wp.media.model.IconPickerFonts = __webpack_require__(5);
 
-wp.media.controller.iconPickerMixin = __webpack_require__(3);
-wp.media.controller.IconPickerFont = __webpack_require__(1);
-wp.media.controller.IconPickerImg = __webpack_require__(2);
+wp.media.controller.iconPickerMixin = __webpack_require__(4);
+wp.media.controller.IconPickerFont = __webpack_require__(2);
+wp.media.controller.IconPickerImg = __webpack_require__(3);
 
-wp.media.view.IconPickerBrowser = __webpack_require__(6);
-wp.media.view.IconPickerSidebar = __webpack_require__(13);
-wp.media.view.IconPickerFontItem = __webpack_require__(9);
-wp.media.view.IconPickerFontLibrary = __webpack_require__(10);
-wp.media.view.IconPickerFontFilter = __webpack_require__(8);
-wp.media.view.IconPickerFontBrowser = __webpack_require__(7);
-wp.media.view.IconPickerImgBrowser = __webpack_require__(12);
-wp.media.view.IconPickerSvgItem = __webpack_require__(14);
-wp.media.view.MediaFrame.IconPicker = __webpack_require__(11);
+wp.media.view.IconPickerBrowser = __webpack_require__(7);
+wp.media.view.IconPickerSidebar = __webpack_require__(14);
+wp.media.view.IconPickerFontItem = __webpack_require__(10);
+wp.media.view.IconPickerFontLibrary = __webpack_require__(11);
+wp.media.view.IconPickerFontFilter = __webpack_require__(9);
+wp.media.view.IconPickerFontBrowser = __webpack_require__(8);
+wp.media.view.IconPickerImgBrowser = __webpack_require__(13);
+wp.media.view.IconPickerSvgItem = __webpack_require__(15);
+wp.media.view.MediaFrame.IconPicker = __webpack_require__(12);
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(0);
+
+(function ($) {
+	var l10n = wp.media.view.l10n.iconPicker,
+	    templates = {},
+	    frame,
+	    selectIcon,
+	    removeIcon,
+	    getFrame,
+	    updateField,
+	    updatePreview,
+	    $field;
+
+	getFrame = function getFrame() {
+		if (!frame) {
+			frame = new wp.media.view.MediaFrame.IconPicker();
+
+			frame.target.on('change', updateField);
+		}
+
+		return frame;
+	};
+
+	updateField = function updateField(model) {
+		_.each(model.get('inputs'), function ($input, key) {
+			$input.val(model.get(key));
+		});
+
+		model.clear({ silent: true });
+		$field.trigger('ipf:update');
+	};
+
+	updatePreview = function updatePreview(e) {
+		var $el = $(e.currentTarget),
+		    $select = $el.find('a.ipf-select'),
+		    $remove = $el.find('a.ipf-remove'),
+		    type = $el.find('input.ipf-type').val(),
+		    icon = $el.find('input.ipf-icon').val(),
+		    url = $el.find('input.url').val(),
+		    template;
+
+		if (type === '' || icon === '' || !_.has(iconPicker.types, type)) {
+			$remove.addClass('hidden');
+			$select.removeClass('has-icon').addClass('button').text(l10n.selectIcon).attr('title', '');
+
+			return;
+		}
+
+		if (templates[type]) {
+			template = templates[type];
+		} else {
+			template = templates[type] = wp.template('iconpicker-' + iconPicker.types[type].templateId + '-icon');
+		}
+
+		$remove.removeClass('hidden');
+		$select.attr('title', l10n.selectIcon).addClass('has-icon').removeClass('button').html(template({
+			type: type,
+			icon: icon,
+			url: url
+		}));
+	};
+
+	selectIcon = function selectIcon(e) {
+		var frame = getFrame(),
+		    model = { inputs: {} };
+
+		e.preventDefault();
+
+		$field = $(e.currentTarget).closest('.ipf');
+		model.id = $field.attr('id');
+
+		// Collect input fields and use them as the model's attributes.
+		$field.find('input').each(function () {
+			var $input = $(this),
+			    key = $input.attr('class').replace('ipf-', ''),
+			    value = $input.val();
+
+			model[key] = value;
+			model.inputs[key] = $input;
+		});
+
+		frame.target.set(model, { silent: true });
+		frame.open();
+	};
+
+	removeIcon = function removeIcon(e) {
+		var $el = $(e.currentTarget).closest('div.ipf');
+
+		$el.find('input').val('');
+		$el.trigger('ipf:update');
+	};
+
+	$(document).on('click', 'a.ipf-select', selectIcon).on('click', 'a.ipf-remove', removeIcon).on('ipf:update', 'div.ipf', updatePreview);
+
+	$('div.ipf').trigger('ipf:update');
+})(jQuery);
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports) {
 
 /**
@@ -162,7 +263,7 @@ var IconPickerFont = wp.media.controller.State.extend(_.extend({}, wp.media.cont
 module.exports = IconPickerFont;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 var Library = wp.media.controller.Library,
@@ -315,7 +416,7 @@ IconPickerImg = Library.extend(_.extend({}, wp.media.controller.iconPickerMixin,
 module.exports = IconPickerImg;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 /**
@@ -355,7 +456,7 @@ var iconPickerMixin = {
 module.exports = iconPickerMixin;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 /**
@@ -439,7 +540,7 @@ var IconPickerFonts = Backbone.Collection.extend({
 module.exports = IconPickerFonts;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports) {
 
 /**
@@ -462,7 +563,7 @@ var IconPickerTarget = Backbone.Model.extend({
 module.exports = IconPickerTarget;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 /**
@@ -482,7 +583,7 @@ var IconPickerBrowser = {
 module.exports = IconPickerBrowser;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 /**
@@ -520,8 +621,6 @@ var IconPickerFontBrowser = wp.media.View.extend(_.extend({
 		});
 
 		// Add keydown listener to the instance of the library view
-		this.items.listenTo(this.controller, 'attachment:keydown:arrow', this.items.arrowEvent);
-		this.items.listenTo(this.controller, 'attachment:details:shift-tab', this.items.restoreFocus);
 
 		this.views.add(this.items);
 	},
@@ -552,7 +651,7 @@ var IconPickerFontBrowser = wp.media.View.extend(_.extend({
 module.exports = IconPickerFontBrowser;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 /**
@@ -590,7 +689,7 @@ var IconPickerFontFilter = wp.media.view.AttachmentFilters.extend({
 module.exports = IconPickerFontFilter;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 var Attachment = wp.media.view.Attachment.Library,
@@ -625,7 +724,7 @@ IconPickerFontItem = Attachment.extend({
 module.exports = IconPickerFontItem;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 var $ = jQuery,
@@ -725,7 +824,7 @@ IconPickerFontLibrary = Attachments.extend({
 module.exports = IconPickerFontLibrary;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 /**
@@ -848,7 +947,7 @@ IconPicker = Select.extend({
 module.exports = IconPicker;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 /**
@@ -859,7 +958,7 @@ var IconPickerImgBrowser = wp.media.view.AttachmentsBrowser.extend(wp.media.view
 module.exports = IconPickerImgBrowser;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 /**
@@ -893,7 +992,7 @@ var IconPickerSidebar = wp.media.view.Sidebar.extend({
 module.exports = IconPickerSidebar;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 /**
@@ -904,107 +1003,6 @@ var IconPickerSvgItem = wp.media.view.Attachment.Library.extend({
 });
 
 module.exports = IconPickerSvgItem;
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(0);
-
-(function ($) {
-	var l10n = wp.media.view.l10n.iconPicker,
-	    templates = {},
-	    frame,
-	    selectIcon,
-	    removeIcon,
-	    getFrame,
-	    updateField,
-	    updatePreview,
-	    $field;
-
-	getFrame = function getFrame() {
-		if (!frame) {
-			frame = new wp.media.view.MediaFrame.IconPicker();
-
-			frame.target.on('change', updateField);
-		}
-
-		return frame;
-	};
-
-	updateField = function updateField(model) {
-		_.each(model.get('inputs'), function ($input, key) {
-			$input.val(model.get(key));
-		});
-
-		model.clear({ silent: true });
-		$field.trigger('ipf:update');
-	};
-
-	updatePreview = function updatePreview(e) {
-		var $el = $(e.currentTarget),
-		    $select = $el.find('a.ipf-select'),
-		    $remove = $el.find('a.ipf-remove'),
-		    type = $el.find('input.ipf-type').val(),
-		    icon = $el.find('input.ipf-icon').val(),
-		    url = $el.find('input.url').val(),
-		    template;
-
-		if (type === '' || icon === '' || !_.has(iconPicker.types, type)) {
-			$remove.addClass('hidden');
-			$select.removeClass('has-icon').addClass('button').text(l10n.selectIcon).attr('title', '');
-
-			return;
-		}
-
-		if (templates[type]) {
-			template = templates[type];
-		} else {
-			template = templates[type] = wp.template('iconpicker-' + iconPicker.types[type].templateId + '-icon');
-		}
-
-		$remove.removeClass('hidden');
-		$select.attr('title', l10n.selectIcon).addClass('has-icon').removeClass('button').html(template({
-			type: type,
-			icon: icon,
-			url: url
-		}));
-	};
-
-	selectIcon = function selectIcon(e) {
-		var frame = getFrame(),
-		    model = { inputs: {} };
-
-		e.preventDefault();
-
-		$field = $(e.currentTarget).closest('.ipf');
-		model.id = $field.attr('id');
-
-		// Collect input fields and use them as the model's attributes.
-		$field.find('input').each(function () {
-			var $input = $(this),
-			    key = $input.attr('class').replace('ipf-', ''),
-			    value = $input.val();
-
-			model[key] = value;
-			model.inputs[key] = $input;
-		});
-
-		frame.target.set(model, { silent: true });
-		frame.open();
-	};
-
-	removeIcon = function removeIcon(e) {
-		var $el = $(e.currentTarget).closest('div.ipf');
-
-		$el.find('input').val('');
-		$el.trigger('ipf:update');
-	};
-
-	$(document).on('click', 'a.ipf-select', selectIcon).on('click', 'a.ipf-remove', removeIcon).on('ipf:update', 'div.ipf', updatePreview);
-
-	$('div.ipf').trigger('ipf:update');
-})(jQuery);
 
 /***/ })
 /******/ ]);
