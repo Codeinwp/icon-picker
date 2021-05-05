@@ -337,4 +337,6 @@ final class Icon_Picker {
 		$this->is_admin_loaded = true;
 	}
 }
-add_action( 'plugins_loaded', array( 'Icon_Picker', 'instance' ), 7 );
+if( function_exists( 'add_action' ) {
+  add_action( 'plugins_loaded', array( 'Icon_Picker', 'instance' ), 7 );
+}
