@@ -276,6 +276,7 @@ final class Icon_Picker {
 	 * @return void
 	 */
 	protected function init_loader() {
+		require_once "{$this->dir}/vendor/autoload.php";
 		require_once "{$this->dir}/includes/loader.php";
 		$this->loader = Icon_Picker_Loader::instance();
 
