@@ -6,8 +6,9 @@
     "license": "GPL-2.0",
     "type": "wordpress-plugin",
     "require": {
+        "php": "^7.1 || ^8.0",
         "composer/installers": "~1.0",
-        "enshrined/svg-sanitize": "^0.18.0"
+        "enshrined/svg-sanitize": "^1.1.1"
     },
     "authors": [
 
